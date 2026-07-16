@@ -3,6 +3,7 @@ from pydantic import BaseModel, Field
 class GPACalculationResult(BaseModel):
     total_credits: int = Field(..., description="Tổng số tín chỉ đã học")
     current_gpa: float = Field(..., description="Điểm trung bình (hệ 10) hiện tại")
+    subjects: list[dict] = Field(default=[], description="Danh sách các môn học đã được trích xuất từ file")
 
 class GPAPredictionRequest(BaseModel):
     current_credits: int = Field(..., description="Tổng số tín chỉ đã học")

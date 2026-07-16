@@ -1,7 +1,7 @@
 import pandas as pd
 import io
 
-def calculate_current_gpa_from_file(file_content: bytes, filename: str) -> tuple[int, float]:
+def calculate_current_gpa_from_file(file_content: bytes, filename: str) -> tuple[int, float, list[dict]]:
     """
     Đọc file CSV/Excel và tính toán GPA hệ 10 hiện tại.
     Chỉ lấy 3 cột đầu tiên tương ứng với: Môn học, Số tín chỉ, Điểm
@@ -23,13 +23,17 @@ def calculate_current_gpa_from_file(file_content: bytes, filename: str) -> tuple
     df = df.dropna(subset=['Số tín chỉ', 'Điểm']) # Xóa lần nữa các dòng vừa bị ép thành NaN
     
     if df.empty:
-        return 0, 0.0
+        return 0, 0.0, []
 
     total_credits = int(df['Số tín chỉ'].sum())
     total_score = (df['Số tín chỉ'] * df['Điểm']).sum()
     
     current_gpa = total_score / total_credits if total_credits > 0 else 0.0
-    return total_credits, round(current_gpa, 2)
+    
+    # Convert dataframe to list of dicts for the frontend
+    subjects_list = df.to_dict('records')
+    
+    return total_credits, round(current_gpa, 2), subjects_list
 
 
 def predict_required_gpa(current_credits: int, current_gpa: float, remaining_credits: int, target_gpa: float) -> dict:

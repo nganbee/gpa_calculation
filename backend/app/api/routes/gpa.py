@@ -7,14 +7,15 @@ router = APIRouter()
 @router.post("/calculate", response_model=GPACalculationResult)
 async def calculate_gpa(file: UploadFile = File(...)):
     """
-    Endpoint để upload file CSV/Excel và trả về tổng tín chỉ cùng điểm trung bình hệ 10.
+    Endpoint để upload file CSV/Excel và trả về tổng tín chỉ, điểm trung bình hệ 10 và danh sách môn học.
     """
     try:
         content = await file.read()
-        total_credits, current_gpa = calculate_current_gpa_from_file(content, file.filename)
+        total_credits, current_gpa, subjects = calculate_current_gpa_from_file(content, file.filename)
         return GPACalculationResult(
             total_credits=total_credits,
-            current_gpa=current_gpa
+            current_gpa=current_gpa,
+            subjects=subjects
         )
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

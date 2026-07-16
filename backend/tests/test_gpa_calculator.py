@@ -19,9 +19,11 @@ Dòng tổng kết, ,, ,
     # Tổng điểm = 24.0 + 18.0 = 42.0
     # GPA = 42.0 / 5 = 8.4
     
-    total_credits, current_gpa = calculate_current_gpa_from_file(csv_content.encode('utf-8'), "test.csv")
+    total_credits, current_gpa, subjects = calculate_current_gpa_from_file(csv_content.encode('utf-8'), "test.csv")
     assert total_credits == 5
     assert current_gpa == 8.4
+    assert len(subjects) == 2
+    assert subjects[0]["Môn học"] == "Toán"
 
 def test_calculate_current_gpa_from_file_invalid_extension():
     with pytest.raises(ValueError, match="Định dạng file không được hỗ trợ"):
