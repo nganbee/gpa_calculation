@@ -4,28 +4,29 @@ import io
 def calculate_current_gpa_from_file(file_content: bytes, filename: str) -> tuple[int, float]:
     """
     Đọc file CSV/Excel và tính toán GPA hệ 10 hiện tại.
-    Giả định các cột: 'Môn học', 'Tín chỉ', 'Điểm'
+    Chỉ lấy 3 cột đầu tiên tương ứng với: Môn học, Số tín chỉ, Điểm
     """
     if filename.endswith('.csv'):
-        df = pd.read_csv(io.BytesIO(file_content))
+        # Lấy 3 cột đầu (0, 1, 2) và gán lại tên cột cho đồng nhất
+        df = pd.read_csv(io.BytesIO(file_content), usecols=[0, 1, 2], names=['Môn học', 'Số tín chỉ', 'Điểm'], header=0)
     elif filename.endswith(('.xls', '.xlsx')):
-        df = pd.read_excel(io.BytesIO(file_content))
+        df = pd.read_excel(io.BytesIO(file_content), usecols=[0, 1, 2], names=['Môn học', 'Số tín chỉ', 'Điểm'], header=0)
     else:
         raise ValueError("Định dạng file không được hỗ trợ (chỉ hỗ trợ csv, xls, xlsx)")
 
-    # Xóa các dòng trống hoặc thiếu dữ liệu quan trọng
-    df = df.dropna(subset=['Tín chỉ', 'Điểm'])
+    # Xóa các dòng trống hoặc dòng chứa text ở phần tổng kết
+    df = df.dropna(subset=['Số tín chỉ', 'Điểm'])
     
-    # Chuyển kiểu dữ liệu
-    df['Tín chỉ'] = pd.to_numeric(df['Tín chỉ'], errors='coerce')
+    # Chuyển kiểu dữ liệu sang số, các text không hợp lệ sẽ thành NaN
+    df['Số tín chỉ'] = pd.to_numeric(df['Số tín chỉ'], errors='coerce')
     df['Điểm'] = pd.to_numeric(df['Điểm'], errors='coerce')
-    df = df.dropna(subset=['Tín chỉ', 'Điểm']) # Xóa lần nữa nếu ép kiểu lỗi
+    df = df.dropna(subset=['Số tín chỉ', 'Điểm']) # Xóa lần nữa các dòng vừa bị ép thành NaN
     
     if df.empty:
         return 0, 0.0
 
-    total_credits = int(df['Tín chỉ'].sum())
-    total_score = (df['Tín chỉ'] * df['Điểm']).sum()
+    total_credits = int(df['Số tín chỉ'].sum())
+    total_score = (df['Số tín chỉ'] * df['Điểm']).sum()
     
     current_gpa = total_score / total_credits if total_credits > 0 else 0.0
     return total_credits, round(current_gpa, 2)
